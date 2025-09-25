@@ -3,6 +3,7 @@ class EditorProposta {
         this.propostaAtual = null;
         this.initEventListeners();
         this.carregarTemplate();
+        this.carregarListaPropostas();
     }
 
     initEventListeners() {
@@ -78,7 +79,7 @@ class EditorProposta {
             if (response.ok) {
                 const proposta = await response.json();
                 this.propostaAtual = proposta;
-                document.getElementById('propostaId').textContent = id;
+                document.getElementById('propostaId').textContent = `${proposta.cliente} - ${id}`;
                 this.mostrarLinkProposta(id);
                 this.preencherFormulario(proposta);
                 this.atualizarPreview();
@@ -139,8 +140,9 @@ class EditorProposta {
             
             if (resultado.success) {
                 this.propostaAtual = { ...dados, id: resultado.id };
-                document.getElementById('propostaId').textContent = resultado.id;
+                document.getElementById('propostaId').textContent = `${dados.cliente} - ${resultado.id}`;
                 this.mostrarLinkProposta(resultado.id);
+                this.salvarPropostaLocalStorage(this.propostaAtual);
                 alert('Proposta criada com sucesso!');
                 this.atualizarPreview();
             }
@@ -170,6 +172,8 @@ class EditorProposta {
             const resultado = await response.json();
             
             if (resultado.success) {
+                this.propostaAtual = { ...dados, id: this.propostaAtual.id };
+                this.salvarPropostaLocalStorage(this.propostaAtual);
                 alert('Proposta salva com sucesso!');
                 this.atualizarPreview();
             }
@@ -181,7 +185,7 @@ class EditorProposta {
 
     mostrarLinkProposta(id) {
         const linkDiv = document.getElementById('linkProposta');
-        const linkInput = document.getElementById('linkPropostaInput');
+        const linkInput = document.getElementById('linkInput');
         
         const link = `${window.location.origin}/proposta/${id}`;
         linkInput.value = link;
@@ -193,10 +197,63 @@ class EditorProposta {
     }
 
     copiarLink() {
-        const linkInput = document.getElementById('linkPropostaInput');
+        const linkInput = document.getElementById('linkInput');
         linkInput.select();
         document.execCommand('copy');
         alert('Link copiado para a área de transferência!');
+    }
+
+    async carregarListaPropostas() {
+        const propostas = this.obterPropostasLocalStorage();
+        this.renderizarListaPropostas(propostas);
+    }
+
+    obterPropostasLocalStorage() {
+        const propostas = localStorage.getItem('propostas');
+        return propostas ? JSON.parse(propostas) : [];
+    }
+
+    salvarPropostaLocalStorage(proposta) {
+        const propostas = this.obterPropostasLocalStorage();
+        const index = propostas.findIndex(p => p.id === proposta.id);
+        
+        if (index >= 0) {
+            propostas[index] = proposta;
+        } else {
+            propostas.unshift(proposta); // Adiciona no início
+        }
+        
+        // Manter apenas as 10 mais recentes
+        const propostasRecentes = propostas.slice(0, 10);
+        localStorage.setItem('propostas', JSON.stringify(propostasRecentes));
+        
+        this.renderizarListaPropostas(propostasRecentes);
+    }
+
+    renderizarListaPropostas(propostas) {
+        const container = document.getElementById('listaPropostas');
+        
+        if (propostas.length === 0) {
+            container.innerHTML = '<p class="text-sm text-gray-500">Nenhuma proposta encontrada</p>';
+            return;
+        }
+
+        const html = propostas.map(proposta => `
+            <div class="proposta-item p-2 border rounded cursor-pointer hover:bg-gray-50" data-id="${proposta.id}">
+                <div class="text-sm font-medium">${proposta.cliente}</div>
+                <div class="text-xs text-gray-500">${proposta.data} - ${proposta.id.substring(0, 8)}...</div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = html;
+        
+        // Adicionar event listeners
+        container.querySelectorAll('.proposta-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                window.location.href = `/?id=${id}`;
+            });
+        });
     }
 
     atualizarPreview() {
