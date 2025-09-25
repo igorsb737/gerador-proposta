@@ -107,6 +107,40 @@ app.get('/api/propostas', async (req, res) => {
     }
 });
 
+// Endpoint de debug para testar Vercel Blob diretamente
+app.get('/api/debug/blobs', async (req, res) => {
+    try {
+        const { storage: storageModule, useBlob } = require('./lib/storage');
+        
+        if (!useBlob) {
+            return res.json({ error: 'Blob não está ativo', useBlob, isVercel: !!process.env.VERCEL });
+        }
+
+        // Testar list() diretamente
+        const { list } = require('@vercel/blob');
+        const result = await list({ prefix: 'propostas/' });
+        
+        console.log('Debug: Raw list result:', JSON.stringify(result, null, 2));
+        
+        const debug = {
+            useBlob,
+            isVercel: !!process.env.VERCEL,
+            totalBlobs: result.blobs?.length || 0,
+            blobs: result.blobs?.map(b => ({
+                pathname: b.pathname,
+                url: b.url,
+                size: b.size,
+                uploadedAt: b.uploadedAt
+            })) || []
+        };
+        
+        res.json(debug);
+    } catch (error) {
+        console.error('Debug error:', error);
+        res.status(500).json({ error: error.message, stack: error.stack });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Acesse: http://localhost:${PORT}`);
