@@ -161,7 +161,7 @@ class EditorProposta {
         try {
             const dados = this.obterDadosFormulario();
             
-            const response = await fetch(`/api/proposta/${this.propostaAtual}`, {
+            const response = await fetch(`/api/proposta/${this.propostaAtual.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -181,8 +181,21 @@ class EditorProposta {
         }
     }
 
+    mostrarLinkProposta(id) {
+        const linkDiv = document.getElementById('linkProposta');
+        const linkInput = document.getElementById('linkPropostaInput');
+        
+        const link = `${window.location.origin}/proposta/${id}`;
+        linkInput.value = link;
+        linkDiv.classList.remove('hidden');
+        
+        // Atualizar URL do editor para incluir ID (para manter após refresh)
+        const editorUrl = `${window.location.origin}/?id=${id}`;
+        window.history.replaceState({}, '', editorUrl);
+    }
+
     copiarLink() {
-        const linkInput = document.getElementById('linkInput');
+        const linkInput = document.getElementById('linkPropostaInput');
         linkInput.select();
         document.execCommand('copy');
         alert('Link copiado para a área de transferência!');
