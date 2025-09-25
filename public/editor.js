@@ -34,6 +34,10 @@ class EditorProposta {
             return;
         }
         
+        this.carregarDadosPadrao();
+    }
+
+    carregarDadosPadrao() {
         // Carregar dados padrão
         const dadosPadrao = {
             cliente: 'TREZE INCORPORADORA',
@@ -80,11 +84,11 @@ class EditorProposta {
                 this.atualizarPreview();
             } else {
                 console.error('Proposta não encontrada');
-                await this.carregarTemplate(); // Fallback para template padrão
+                this.carregarDadosPadrao(); // Fallback para template padrão
             }
         } catch (error) {
             console.error('Erro ao carregar proposta:', error);
-            await this.carregarTemplate(); // Fallback para template padrão
+            this.carregarDadosPadrao(); // Fallback para template padrão
         }
     }
 
@@ -134,15 +138,9 @@ class EditorProposta {
             const resultado = await response.json();
             
             if (resultado.success) {
-                this.propostaAtual = resultado.id;
+                this.propostaAtual = { ...dados, id: resultado.id };
                 document.getElementById('propostaId').textContent = resultado.id;
-                
-                // Mostrar link
-                const linkDiv = document.getElementById('linkProposta');
-                const linkInput = document.getElementById('linkInput');
-                linkInput.value = window.location.origin + resultado.link;
-                linkDiv.classList.remove('hidden');
-                
+                this.mostrarLinkProposta(resultado.id);
                 alert('Proposta criada com sucesso!');
                 this.atualizarPreview();
             }
