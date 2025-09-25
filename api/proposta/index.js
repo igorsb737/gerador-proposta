@@ -20,6 +20,9 @@ module.exports = async (req, res) => {
 
     // Leitura robusta do corpo (Vercel @vercel/node pode não popular req.body)
     const body = await readJsonBody(req);
+    
+    console.log('Criando proposta:', propostaId);
+    console.log('Dados recebidos:', Object.keys(body));
 
     const templateProposta = {
       id: '',
@@ -53,7 +56,11 @@ module.exports = async (req, res) => {
     };
 
     const novaProposta = { ...templateProposta, id: propostaId, ...body };
-    await storage.saveProposta(novaProposta);
+    
+    console.log('Salvando proposta no storage...');
+    const resultado = await storage.saveProposta(novaProposta);
+    console.log('Resultado do storage:', resultado);
+    
     return res.status(200).json({ success: true, id: propostaId, link: `/proposta/${propostaId}` });
   } catch (e) {
     console.error('Error creating proposta', e);
