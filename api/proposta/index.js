@@ -2,10 +2,12 @@ const { v4: uuidv4 } = require('uuid');
 const { storage } = require('../../lib/storage');
 
 module.exports = async (req, res) => {
+  // CORS e headers padrão
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     return res.status(200).end();
   }
 
@@ -15,7 +17,9 @@ module.exports = async (req, res) => {
 
   try {
     const propostaId = uuidv4();
-    const body = req.body || {};
+
+    // Leitura robusta do corpo (Vercel @vercel/node pode não popular req.body)
+    const body = await readJsonBody(req);
 
     const templateProposta = {
       id: '',
@@ -50,11 +54,22 @@ module.exports = async (req, res) => {
 
     const novaProposta = { ...templateProposta, id: propostaId, ...body };
     await storage.saveProposta(novaProposta);
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
     return res.status(200).json({ success: true, id: propostaId, link: `/proposta/${propostaId}` });
   } catch (e) {
     console.error('Error creating proposta', e);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+// Utilitário para ler JSON do corpo em funções serverless do Vercel
+async function readJsonBody(req) {
+  try {
+    if (req.body && typeof req.body === 'object') return req.body;
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const raw = Buffer.concat(chunks).toString('utf8') || '{}';
+    return JSON.parse(raw);
+  } catch (_e) {
+    return {};
+  }
+}
