@@ -51,7 +51,7 @@ const templateProposta = {
 
 // Rota principal - Editor
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'editor.html'));
+    res.sendFile(path.join(__dirname, 'editor.html'));
 });
 
 // Rota para visualizar proposta específica
@@ -61,7 +61,7 @@ app.get('/proposta/:id', async (req, res) => {
     if (!exist) {
         return res.status(404).send('Proposta não encontrada');
     }
-    res.sendFile(path.join(__dirname, 'public', 'visualizar.html'));
+    res.sendFile(path.join(__dirname, 'visualizar.html'));
 });
 
 // API para criar nova proposta

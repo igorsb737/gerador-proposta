@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/**/*.js", "use": "@vercel/node" }
-  ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "@vercel/node@18"
+    }
+  },
   "rewrites": [
-    { "source": "/", "destination": "/public/editor.html" },
-    { "source": "/visualizar.html", "destination": "/public/visualizar.html" },
-    { "source": "/proposta/:id", "destination": "/public/visualizar.html" }
-  ],
-  "cleanUrls": true
+    { "source": "/", "destination": "/editor.html" },
+    { "source": "/proposta/(.*)", "destination": "/visualizar.html" }
+  ]
 }
