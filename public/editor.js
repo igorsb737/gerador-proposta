@@ -25,6 +25,15 @@ class EditorProposta {
     }
 
     async carregarTemplate() {
+        // Verificar se há ID na URL para carregar proposta existente
+        const urlParams = new URLSearchParams(window.location.search);
+        const propostaId = urlParams.get('id');
+        
+        if (propostaId) {
+            await this.carregarProposta(propostaId);
+            return;
+        }
+        
         // Carregar dados padrão
         const dadosPadrao = {
             cliente: 'TREZE INCORPORADORA',
@@ -57,6 +66,26 @@ class EditorProposta {
 
         this.preencherFormulario(dadosPadrao);
         this.atualizarPreview();
+    }
+
+    async carregarProposta(id) {
+        try {
+            const response = await fetch(`/api/proposta/${id}`);
+            if (response.ok) {
+                const proposta = await response.json();
+                this.propostaAtual = proposta;
+                document.getElementById('propostaId').textContent = id;
+                this.mostrarLinkProposta(id);
+                this.preencherFormulario(proposta);
+                this.atualizarPreview();
+            } else {
+                console.error('Proposta não encontrada');
+                await this.carregarTemplate(); // Fallback para template padrão
+            }
+        } catch (error) {
+            console.error('Erro ao carregar proposta:', error);
+            await this.carregarTemplate(); // Fallback para template padrão
+        }
     }
 
     preencherFormulario(dados) {

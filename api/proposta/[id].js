@@ -20,18 +20,30 @@ module.exports = async (req, res) => {
     }
 
     if (method === 'PUT') {
-      const atual = await storage.getProposta(id);
-      if (!atual) return res.status(404).json({ error: 'Proposta não encontrada' });
-
-      const body = req.body || {};
-      const propostaAtualizada = { ...atual, ...body };
+      // Leitura robusta do corpo
+      const body = await readJsonBody(req);
+      const propostaAtualizada = { ...body, id };
+      
       await storage.saveProposta(propostaAtualizada);
-      return res.status(200).json({ success: true });
+      return res.status(200).json({ success: true, id });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (e) {
-    console.error('Erro na rota proposta/[id]:', e);
+    console.error('Error in proposta API:', e);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+// Utilitário para ler JSON do corpo
+async function readJsonBody(req) {
+  try {
+    if (req.body && typeof req.body === 'object') return req.body;
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const raw = Buffer.concat(chunks).toString('utf8') || '{}';
+    return JSON.parse(raw);
+  } catch (_e) {
+    return {};
+  }
+}
