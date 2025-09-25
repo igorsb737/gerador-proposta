@@ -220,12 +220,28 @@ class EditorProposta {
 
     async carregarListaPropostas() {
         // Aguardar um pouco para garantir que o DOM esteja pronto
-        setTimeout(() => {
+        setTimeout(async () => {
             try {
-                const propostas = this.obterPropostasLocalStorage();
-                this.renderizarListaPropostas(propostas);
+                // Tenta buscar do servidor (em prod: Vercel Blob; em dev: filesystem)
+                const resp = await fetch('/api/propostas');
+                if (resp.ok) {
+                    const propostas = await resp.json();
+                    this.renderizarListaPropostas(propostas);
+                    // Atualiza cache local (mantém as 10 mais recentes)
+                    try {
+                        localStorage.setItem('propostas', JSON.stringify((propostas || []).slice(0, 10)));
+                    } catch (_) { /* ignore */ }
+                    return;
+                }
+                throw new Error(`HTTP ${resp.status}`);
             } catch (error) {
-                console.warn('Erro ao carregar lista de propostas:', error.message);
+                // Fallback: carrega do cache local
+                try {
+                    const propostas = this.obterPropostasLocalStorage();
+                    this.renderizarListaPropostas(propostas);
+                } catch (e) {
+                    console.warn('Erro ao carregar lista de propostas:', e.message);
+                }
             }
         }, 200);
     }
