@@ -226,39 +226,21 @@ class EditorProposta {
         // Aguardar um pouco para garantir que o DOM esteja pronto
         setTimeout(async () => {
             try {
+                console.log('Frontend: Buscando propostas em /api/propostas...');
                 const resp = await fetch('/api/propostas');
                 if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
                 const propostas = await resp.json();
+                console.log('Frontend: Recebidas', propostas.length, 'propostas do servidor:', propostas);
                 this.renderizarListaPropostas(propostas);
             } catch (error) {
-                console.warn('Erro ao buscar propostas do servidor:', error.message);
+                console.warn('Frontend: Erro ao buscar propostas do servidor:', error.message);
                 // Renderizar vazio explícito (sem fallback localStorage)
                 this.renderizarListaPropostas([]);
             }
         }, 200);
     }
 
-    obterPropostasLocalStorage() {
-        const propostas = localStorage.getItem('propostas');
-        return propostas ? JSON.parse(propostas) : [];
-    }
-
-    salvarPropostaLocalStorage(proposta) {
-        const propostas = this.obterPropostasLocalStorage();
-        const index = propostas.findIndex(p => p.id === proposta.id);
-        
-        if (index >= 0) {
-            propostas[index] = proposta;
-        } else {
-            propostas.unshift(proposta); // Adiciona no início
-        }
-        
-        // Manter apenas as 10 mais recentes
-        const propostasRecentes = propostas.slice(0, 10);
-        localStorage.setItem('propostas', JSON.stringify(propostasRecentes));
-        
-        this.renderizarListaPropostas(propostasRecentes);
-    }
+    // Métodos de localStorage removidos - usando exclusivamente backend/Blob
 
     renderizarListaPropostas(propostas) {
         const container = document.getElementById('listaPropostas');
