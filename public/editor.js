@@ -3,7 +3,13 @@ class EditorProposta {
         this.propostaAtual = null;
         this.initEventListeners();
         this.carregarTemplate();
-        this.carregarListaPropostas();
+        
+        // Aguardar DOM estar pronto para carregar lista
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.carregarListaPropostas());
+        } else {
+            this.carregarListaPropostas();
+        }
     }
 
     initEventListeners() {
@@ -204,8 +210,11 @@ class EditorProposta {
     }
 
     async carregarListaPropostas() {
-        const propostas = this.obterPropostasLocalStorage();
-        this.renderizarListaPropostas(propostas);
+        // Aguardar um pouco para garantir que o DOM esteja pronto
+        setTimeout(() => {
+            const propostas = this.obterPropostasLocalStorage();
+            this.renderizarListaPropostas(propostas);
+        }, 100);
     }
 
     obterPropostasLocalStorage() {
@@ -232,6 +241,11 @@ class EditorProposta {
 
     renderizarListaPropostas(propostas) {
         const container = document.getElementById('listaPropostas');
+        
+        if (!container) {
+            console.warn('Elemento listaPropostas não encontrado');
+            return;
+        }
         
         if (propostas.length === 0) {
             container.innerHTML = '<p class="text-sm text-gray-500">Nenhuma proposta encontrada</p>';
