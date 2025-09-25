@@ -4,11 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor de Propostas - DGenny</title>
-    <link rel="stylesheet" href="/public/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Saira', sans-serif;
+            background-color: #f6f6e9;
+            color: #030303;
+        }
+        .editor-panel {
+            background-color: #ffffff;
+            border-right: 2px solid #07325b;
+        }
+        .preview-panel {
+            background-color: #f8f9fa;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #07325b;
+            margin-bottom: 0.5rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e1e1e1;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #07325b;
+            box-shadow: 0 0 0 2px rgba(7, 50, 91, 0.1);
+        }
+        .btn-primary {
+            background-color: #07325b;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #0a3d6b;
+        }
         .btn-secondary {
             background-color: #ffbf48;
             color: #030303;

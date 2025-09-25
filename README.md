@@ -36,19 +36,7 @@ sistema-proposta/
 npm install
 ```
 
-### 2. Compilar CSS (Tailwind)
-
-```bash
-npm run build
-```
-
-Para desenvolvimento com watch mode:
-
-```bash
-npm run build-css
-```
-
-### 3. Iniciar o Servidor
+### 2. Iniciar o Servidor
 
 ```bash
 npm start
@@ -60,25 +48,10 @@ Ou para desenvolvimento com auto-reload:
 npm run dev
 ```
 
-### 4. Acessar o Sistema
+### 3. Acessar o Sistema
 
 - **Editor**: http://localhost:3000
 - **Proposta específica**: http://localhost:3000/proposta/{ID}
-
-## Deploy no Vercel
-
-### 1. Configurar Variáveis de Ambiente
-
-No painel do Vercel, adicione:
-
-```
-BLOB_READ_WRITE_TOKEN=seu_token_vercel_blob
-NODE_ENV=production
-```
-
-### 2. Deploy
-
-O projeto está configurado para build automático no Vercel. O comando `npm run build` será executado automaticamente.
 
 ## Como Usar
 
