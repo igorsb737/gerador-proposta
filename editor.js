@@ -3,6 +3,8 @@ class EditorProposta {
         this.propostaAtual = null;
         this.initEventListeners();
         this.carregarTemplate();
+        // Garantir que a lista venha exclusivamente do backend
+        try { localStorage.removeItem('propostas'); } catch (_) { /* ignore */ }
         
         // Aguardar DOM estar pronto para carregar lista
         if (document.readyState === 'loading') {
@@ -157,9 +159,10 @@ class EditorProposta {
                 this.propostaAtual = { ...dados, id: resultado.id };
                 document.getElementById('propostaId').textContent = `${dados.cliente} - ${resultado.id}`;
                 this.mostrarLinkProposta(resultado.id);
-                this.salvarPropostaLocalStorage(this.propostaAtual);
                 alert('Proposta criada com sucesso!');
                 this.atualizarPreview();
+                // Recarrega lista exclusivamente do backend (Blob em prod)
+                this.carregarListaPropostas();
             }
         } catch (error) {
             console.error('Erro ao criar proposta:', error);
@@ -188,9 +191,10 @@ class EditorProposta {
             
             if (resultado.success) {
                 this.propostaAtual = { ...dados, id: this.propostaAtual.id };
-                this.salvarPropostaLocalStorage(this.propostaAtual);
                 alert('Proposta salva com sucesso!');
                 this.atualizarPreview();
+                // Recarrega lista exclusivamente do backend (Blob em prod)
+                this.carregarListaPropostas();
             }
         } catch (error) {
             console.error('Erro ao salvar proposta:', error);
@@ -222,26 +226,14 @@ class EditorProposta {
         // Aguardar um pouco para garantir que o DOM esteja pronto
         setTimeout(async () => {
             try {
-                // Tenta buscar do servidor (em prod: Vercel Blob; em dev: filesystem)
                 const resp = await fetch('/api/propostas');
-                if (resp.ok) {
-                    const propostas = await resp.json();
-                    this.renderizarListaPropostas(propostas);
-                    // Atualiza cache local (mantém as 10 mais recentes)
-                    try {
-                        localStorage.setItem('propostas', JSON.stringify((propostas || []).slice(0, 10)));
-                    } catch (_) { /* ignore */ }
-                    return;
-                }
-                throw new Error(`HTTP ${resp.status}`);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const propostas = await resp.json();
+                this.renderizarListaPropostas(propostas);
             } catch (error) {
-                // Fallback: carrega do cache local
-                try {
-                    const propostas = this.obterPropostasLocalStorage();
-                    this.renderizarListaPropostas(propostas);
-                } catch (e) {
-                    console.warn('Erro ao carregar lista de propostas:', e.message);
-                }
+                console.warn('Erro ao buscar propostas do servidor:', error.message);
+                // Renderizar vazio explícito (sem fallback localStorage)
+                this.renderizarListaPropostas([]);
             }
         }, 200);
     }
