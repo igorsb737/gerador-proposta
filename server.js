@@ -96,8 +96,15 @@ app.put('/api/proposta/:id', async (req, res) => {
 
 // API para listar todas as propostas
 app.get('/api/propostas', async (req, res) => {
-    const propostas = await storage.listPropostas();
-    res.json(propostas);
+    try {
+        console.log('GET /api/propostas - Listando propostas...');
+        const propostas = await storage.listPropostas();
+        console.log('Propostas retornadas:', propostas.length, 'itens');
+        res.json(propostas);
+    } catch (error) {
+        console.error('Erro ao listar propostas:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
 });
 
 app.listen(PORT, () => {
