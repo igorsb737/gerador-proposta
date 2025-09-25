@@ -36,9 +36,14 @@ class EditorProposta {
         const urlParams = new URLSearchParams(window.location.search);
         const propostaId = urlParams.get('id');
         
-        if (propostaId) {
+        if (propostaId && propostaId.length > 10) { // Validar se parece com um UUID
             await this.carregarProposta(propostaId);
             return;
+        }
+        
+        // Se não há ID válido, limpar URL e carregar dados padrão
+        if (propostaId) {
+            window.history.replaceState({}, '', '/');
         }
         
         this.carregarDadosPadrao();
@@ -90,12 +95,16 @@ class EditorProposta {
                 this.preencherFormulario(proposta);
                 this.atualizarPreview();
             } else {
-                console.error('Proposta não encontrada');
-                this.carregarDadosPadrao(); // Fallback para template padrão
+                console.warn(`Proposta ${id} não encontrada no servidor`);
+                // Limpar URL inválida e carregar dados padrão
+                window.history.replaceState({}, '', '/');
+                this.carregarDadosPadrao();
             }
         } catch (error) {
-            console.error('Erro ao carregar proposta:', error);
-            this.carregarDadosPadrao(); // Fallback para template padrão
+            console.warn(`Erro ao carregar proposta ${id}:`, error.message);
+            // Limpar URL inválida e carregar dados padrão
+            window.history.replaceState({}, '', '/');
+            this.carregarDadosPadrao();
         }
     }
 
@@ -212,9 +221,13 @@ class EditorProposta {
     async carregarListaPropostas() {
         // Aguardar um pouco para garantir que o DOM esteja pronto
         setTimeout(() => {
-            const propostas = this.obterPropostasLocalStorage();
-            this.renderizarListaPropostas(propostas);
-        }, 100);
+            try {
+                const propostas = this.obterPropostasLocalStorage();
+                this.renderizarListaPropostas(propostas);
+            } catch (error) {
+                console.warn('Erro ao carregar lista de propostas:', error.message);
+            }
+        }, 200);
     }
 
     obterPropostasLocalStorage() {
@@ -243,7 +256,15 @@ class EditorProposta {
         const container = document.getElementById('listaPropostas');
         
         if (!container) {
-            console.warn('Elemento listaPropostas não encontrado');
+            // Tentar novamente após um tempo se o elemento não foi encontrado
+            setTimeout(() => {
+                const containerRetry = document.getElementById('listaPropostas');
+                if (containerRetry) {
+                    this.renderizarListaPropostas(propostas);
+                } else {
+                    console.warn('Elemento listaPropostas não encontrado após retry');
+                }
+            }, 500);
             return;
         }
         
