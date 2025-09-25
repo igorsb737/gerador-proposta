@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/public/editor.html" },
-    { "source": "/proposta/(.*)", "destination": "/public/visualizar.html" }
+    { "source": "/", "destination": "/editor.html" },
+    { "source": "/proposta/(.*)", "destination": "/visualizar.html" }
   ]
 }
