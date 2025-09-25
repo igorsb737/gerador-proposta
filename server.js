@@ -4,7 +4,10 @@ const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
+console.log('=== SERVIDOR INICIANDO ===');
+console.log('Importando storage...');
 const { storage } = require('./lib/storage');
+console.log('Storage importado com sucesso');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,6 +51,19 @@ const templateProposta = {
     validade: '30/09/2025',
     contato: 'rodrigo@dgenny.com.br'
 };
+
+// Endpoint de teste
+app.get('/api/test', (req, res) => {
+    console.log('=== TESTE ENDPOINT CHAMADO ===');
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        env: {
+            VERCEL: process.env.VERCEL,
+            NODE_ENV: process.env.NODE_ENV
+        }
+    });
+});
 
 // Rota principal - Editor
 app.get('/', (req, res) => {
