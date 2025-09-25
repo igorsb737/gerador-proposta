@@ -297,9 +297,9 @@ class EditorProposta {
         
         const iframe = document.getElementById('previewFrame');
         const doc = iframe.contentDocument || iframe.contentWindow.document;
-        doc.open();
-        doc.write(htmlProposta);
-        doc.close();
+        
+        // Usar innerHTML ao invés de document.write para evitar warnings
+        doc.documentElement.innerHTML = htmlProposta.replace('<!DOCTYPE html>', '').replace('<html lang="pt-BR">', '').replace('</html>', '');
     }
 
     gerarHTMLProposta(dados) {
@@ -309,7 +309,7 @@ class EditorProposta {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proposta DGenny para ${dados.cliente}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/public/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700&display=swap" rel="stylesheet">

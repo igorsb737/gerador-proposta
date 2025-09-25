@@ -2,5 +2,16 @@
   "rewrites": [
     { "source": "/", "destination": "/editor.html" },
     { "source": "/proposta/(.*)", "destination": "/visualizar.html" }
+  ],
+  "headers": [
+    {
+      "source": "/public/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
   ]
 }
