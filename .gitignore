@@ -1,0 +1,34 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Vercel
+.vercel/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Build/Cache
+.dist/
+.cache/
+.tmp/
+
+# Local data (do not version proposals created locally)
+data/propostas/
+
+# Logs
+logs/
+*.log
+
+# Misc
+*.local
