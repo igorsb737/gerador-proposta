@@ -1,7 +1,10 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/", "destination": "/editor.html" },
-    { "source": "/proposta/(.*)", "destination": "/visualizar.html" }
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "^/$", "dest": "/editor.html" },
+    { "src": "^/proposta/.*", "dest": "/visualizar.html" }
   ]
 }
