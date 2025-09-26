@@ -431,7 +431,31 @@
         }
       })();
     </script>
+    <!-- Debug script para testar se o botão funciona -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const btnNova = document.getElementById('novaProposta');
+        const telaInicial = document.getElementById('telaInicial');
+        const telaEdicao = document.getElementById('telaEdicao');
+        
+        console.log('Debug - Elementos encontrados:');
+        console.log('btnNova:', !!btnNova);
+        console.log('telaInicial:', !!telaInicial);
+        console.log('telaEdicao:', !!telaEdicao);
+        
+        if (btnNova) {
+          btnNova.addEventListener('click', () => {
+            console.log('Debug - Botão Nova Proposta clicado');
+            if (telaInicial && telaEdicao) {
+              telaInicial.classList.add('hidden');
+              telaEdicao.classList.remove('hidden');
+              console.log('Debug - Telas alternadas');
+            }
+          });
+        }
+      });
+    </script>
     <!-- Cache-busting query to ensure latest JS is loaded after deploy -->
-    <script src="editor.js?v=20250925-3"></script>
+    <script src="editor.js?v=20250925-4"></script>
 </body>
 </html>
