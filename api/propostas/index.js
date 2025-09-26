@@ -25,6 +25,8 @@ module.exports = async (req, res) => {
           cliente: data.cliente,
           data: data.data,
           plano: data.plano,
+          vendedor: data.vendedor || null,
+          observacaoInterna: data.observacaoInterna || null,
           // metadados úteis para ordenação
           _uploadedAt: b.uploadedAt || null,
           _pathname: b.pathname,

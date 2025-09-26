@@ -111,20 +111,14 @@
             <!-- Controles de Proposta -->
             <div class="mb-6">
                 <button id="novaProposta" class="btn-primary w-full mb-2">Nova Proposta</button>
-                <button id="salvarProposta" class="btn-secondary w-full mb-2">Salvar Alterações</button>
                 <div class="text-sm text-gray-600 mt-2">
                     <span>ID da Proposta: </span>
                     <span id="propostaId" class="font-mono">-</span>
                 </div>
-                <div id="linkProposta" class="hidden mt-2">
-                    <label class="form-label">Link da Proposta:</label>
-                    <input type="text" id="linkInput" class="form-input" readonly>
-                    <button id="copiarLink" class="btn-secondary mt-1 w-full">Copiar Link</button>
-                </div>
             </div>
 
             <!-- Formulário de Edição -->
-            <form id="formProposta">
+            <form id="formProposta" class="hidden">
                 <!-- Informações Básicas -->
                 <div class="section-header">Informações Básicas</div>
                 
@@ -133,7 +127,15 @@
                         Cliente
                         <span class="tooltip" data-tooltip="Nome da empresa cliente">ℹ️</span>
                     </label>
-                    <input type="text" name="cliente" class="form-input" value="TREZE INCORPORADORA">
+                    <input type="text" name="cliente" class="form-input" value="">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Vendedor
+                        <span class="tooltip" data-tooltip="Responsável comercial pela proposta">ℹ️</span>
+                    </label>
+                    <input type="text" name="vendedor" class="form-input" value="">
                 </div>
 
                 <div class="form-group">
@@ -184,7 +186,7 @@
                         ROI Projetado
                         <span class="tooltip" data-tooltip="Retorno sobre investimento estimado">ℹ️</span>
                     </label>
-                    <input type="text" name="roi" class="form-input" value="R$ 50.000 / mês">
+                    <input type="text" name="roi" class="form-input" value="R$ 20.000 / mês">
                 </div>
 
                 <div class="form-group">
@@ -243,7 +245,7 @@
 
                 <div class="form-group">
                     <label class="form-label">
-                        <input type="checkbox" name="mostrarDesconto" checked style="margin-right: 0.5rem;">
+                        <input type="checkbox" name="mostrarDesconto" style="margin-right: 0.5rem;">
                         Mostrar Desconto na Oferta
                         <span class="tooltip" data-tooltip="Exibir desconto de 50% nas primeiras mensalidades">ℹ️</span>
                     </label>
@@ -275,7 +277,7 @@
 
                 <div class="form-group">
                     <label class="form-label">
-                        <input type="checkbox" name="mostrarDescontoImplantacao" checked style="margin-right: 0.5rem;">
+                        <input type="checkbox" name="mostrarDescontoImplantacao" style="margin-right: 0.5rem;">
                         Mostrar Desconto na Implantação
                         <span class="tooltip" data-tooltip="Exibir desconto no valor da implantação">ℹ️</span>
                     </label>
@@ -294,7 +296,7 @@
 
                 <div class="form-group">
                     <label class="form-label">
-                        <input type="checkbox" name="mostrarOfertaFeira" checked style="margin-right: 0.5rem;">
+                        <input type="checkbox" name="mostrarOfertaFeira" style="margin-right: 0.5rem;">
                         Mostrar Oferta Feira Construir.Aí
                         <span class="tooltip" data-tooltip="Exibir seção da oferta especial da feira">ℹ️</span>
                     </label>
@@ -303,7 +305,7 @@
 
                 <div class="form-group">
                     <label class="form-label">
-                        <input type="checkbox" name="mostrarIntegracoes" checked style="margin-right: 0.5rem;">
+                        <input type="checkbox" name="mostrarIntegracoes" style="margin-right: 0.5rem;">
                         Mostrar Seção de Integrações
                         <span class="tooltip" data-tooltip="Exibir seção sobre integrações de sistemas">ℹ️</span>
                     </label>
@@ -319,7 +321,7 @@
 
                 <div class="form-group">
                     <label class="form-label">
-                        <input type="checkbox" name="semFidelidade" checked style="margin-right: 0.5rem;">
+                        <input type="checkbox" name="semFidelidade" style="margin-right: 0.5rem;">
                         Sem Fidelidade Contratual
                         <span class="tooltip" data-tooltip="Indicar que não há período de fidelidade">ℹ️</span>
                     </label>
@@ -346,7 +348,25 @@
                         Contato
                         <span class="tooltip" data-tooltip="Email de contato">ℹ️</span>
                     </label>
-                    <input type="text" name="contato" class="form-input" value="rodrigo@dgenny.com.br">
+                    <input type="text" name="contato" class="form-input" value="simone@dgenny.com.br">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Observação Interna
+                        <span class="tooltip" data-tooltip="Anotações internas. Não aparece na proposta.">ℹ️</span>
+                    </label>
+                    <input type="text" name="observacaoInterna" class="form-input" value="">
+                </div>
+
+                <!-- Botão Salvar e Link -->
+                <div class="mt-4">
+                    <button id="salvarProposta" type="button" class="btn-secondary w-full mb-2">Salvar</button>
+                    <div id="linkProposta" class="hidden mt-2">
+                        <label class="form-label">Link da Proposta:</label>
+                        <input type="text" id="linkInput" class="form-input" readonly>
+                        <button id="copiarLink" class="btn-secondary mt-1 w-full">Copiar Link</button>
+                    </div>
                 </div>
 
                 <!-- Lista de Propostas -->
@@ -359,7 +379,7 @@
         </div>
 
         <!-- Painel de Visualização (Direita) -->
-        <div class="w-2/3 preview-panel flex flex-col">
+        <div id="previewPanel" class="w-2/3 preview-panel flex flex-col hidden">
             <div class="flex-1 overflow-y-auto p-6">
                 <div class="bg-white rounded-lg shadow-lg h-full">
                     <iframe id="previewFrame" class="w-full h-full border-0 rounded-lg"></iframe>

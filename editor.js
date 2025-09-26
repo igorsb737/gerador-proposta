@@ -40,6 +40,9 @@ class EditorProposta {
         
         if (propostaId && propostaId.length > 10) { // Validar se parece com um UUID
             await this.carregarProposta(propostaId);
+            // Mostrar UI completa
+            document.getElementById('formProposta').classList.remove('hidden');
+            document.getElementById('previewPanel').classList.remove('hidden');
             return;
         }
         
@@ -48,19 +51,20 @@ class EditorProposta {
             window.history.replaceState({}, '', '/');
         }
         
-        this.carregarDadosPadrao();
+        // Não mostrar formulário por padrão; apenas lista e botão 'Nova Proposta'
     }
 
     carregarDadosPadrao() {
         // Carregar dados padrão
         const dadosPadrao = {
-            cliente: 'TREZE INCORPORADORA',
+            cliente: '',
+            vendedor: '',
             data: new Date().toLocaleDateString('pt-BR'),
             plano: 'Prime',
             negociacoes: '2.000',
             usuarios: '5',
             whatsapp: '1',
-            roi: 'R$ 50.000 / mês',
+            roi: 'R$ 20.000 / mês',
             pacoteAdicional: 'R$ 200 para 100 negociações',
             whatsappAdicional: 'R$ 350 por número',
             garantiaTempo: '60',
@@ -72,14 +76,15 @@ class EditorProposta {
             implantacao: 'R$ 10.000',
             implantacaoDesconto: 'R$ 5.000',
             integracoes: 'SIENGE',
-            mostrarOfertaFeira: true,
-            mostrarDesconto: true,
-            mostrarDescontoImplantacao: true,
-            mostrarIntegracoes: true,
-            semFidelidade: true,
+            mostrarOfertaFeira: false,
+            mostrarDesconto: false,
+            mostrarDescontoImplantacao: false,
+            mostrarIntegracoes: false,
+            semFidelidade: false,
             textoFidelidade: 'Após a implantação, não há período de fidelidade.',
             validade: '30/09/2025',
-            contato: 'rodrigo@dgenny.com.br'
+            contato: 'simone@dgenny.com.br',
+            observacaoInterna: ''
         };
 
         this.preencherFormulario(dadosPadrao);
@@ -142,60 +147,55 @@ class EditorProposta {
     }
 
     async novaProposta() {
-        try {
-            const dados = this.obterDadosFormulario();
-            
-            const response = await fetch('/api/proposta', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dados)
-            });
-
-            const resultado = await response.json();
-            
-            if (resultado.success) {
-                this.propostaAtual = { ...dados, id: resultado.id };
-                document.getElementById('propostaId').textContent = `${dados.cliente} - ${resultado.id}`;
-                this.mostrarLinkProposta(resultado.id);
-                alert('Proposta criada com sucesso!');
-                this.atualizarPreview();
-                // Recarrega lista exclusivamente do backend (Blob em prod)
-                this.carregarListaPropostas();
-            }
-        } catch (error) {
-            console.error('Erro ao criar proposta:', error);
-            alert('Erro ao criar proposta');
-        }
+        // Apenas prepara a UI para uma nova proposta; criação acontece ao salvar
+        this.propostaAtual = null;
+        document.getElementById('propostaId').textContent = '-';
+        document.getElementById('formProposta').classList.remove('hidden');
+        document.getElementById('previewPanel').classList.remove('hidden');
+        this.carregarDadosPadrao();
+        // Esconde link até salvar
+        document.getElementById('linkProposta').classList.add('hidden');
     }
 
     async salvarProposta() {
-        if (!this.propostaAtual) {
-            alert('Crie uma nova proposta primeiro');
-            return;
-        }
-
         try {
             const dados = this.obterDadosFormulario();
-            
-            const response = await fetch(`/api/proposta/${this.propostaAtual.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dados)
-            });
-
-            const resultado = await response.json();
-            
-            if (resultado.success) {
-                this.propostaAtual = { ...dados, id: this.propostaAtual.id };
-                alert('Proposta salva com sucesso!');
-                this.atualizarPreview();
-                // Recarrega lista exclusivamente do backend (Blob em prod)
-                this.carregarListaPropostas();
+            let resultado;
+            if (!this.propostaAtual || !this.propostaAtual.id) {
+                // Criar nova
+                const resp = await fetch('/api/proposta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                resultado = await resp.json();
+                if (resp.ok && resultado.success) {
+                    this.propostaAtual = { ...dados, id: resultado.id };
+                    document.getElementById('propostaId').textContent = `${dados.cliente || ''} - ${resultado.id}`;
+                    this.mostrarLinkProposta(resultado.id);
+                    alert('Proposta criada com sucesso!');
+                    this.atualizarPreview();
+                } else {
+                    throw new Error('Falha ao criar proposta');
+                }
+            } else {
+                // Atualizar existente
+                const resp = await fetch(`/api/proposta/${this.propostaAtual.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                resultado = await resp.json();
+                if (resp.ok && resultado.success) {
+                    this.propostaAtual = { ...dados, id: this.propostaAtual.id };
+                    alert('Proposta salva com sucesso!');
+                    this.atualizarPreview();
+                } else {
+                    throw new Error('Falha ao salvar proposta');
+                }
             }
+            // Atualiza lista
+            this.carregarListaPropostas();
         } catch (error) {
             console.error('Erro ao salvar proposta:', error);
             alert('Erro ao salvar proposta');
@@ -259,20 +259,46 @@ class EditorProposta {
             return;
         }
 
-        const html = propostas.map(proposta => `
-            <div class="proposta-item p-2 border rounded cursor-pointer hover:bg-gray-50" data-id="${proposta.id}">
-                <div class="text-sm font-medium">${proposta.cliente}</div>
-                <div class="text-xs text-gray-500">${proposta.data} - ${proposta.id.substring(0, 8)}...</div>
-            </div>
-        `).join('');
+        const html = propostas.map(proposta => {
+            const obs = proposta.observacaoInterna ? `<div class=\"text-xs text-gray-400\">${proposta.observacaoInterna}</div>` : '';
+            return `
+            <div class=\"proposta-item p-2 border rounded hover:bg-gray-50\" data-id=\"${proposta.id}\" style=\"display:flex;justify-content:space-between;align-items:center;gap:8px;\">
+                <div class=\"flex-1 cursor-pointer\" data-action=\"open\">
+                    <div class=\"text-sm font-medium\">${proposta.cliente}</div>
+                    <div class=\"text-xs text-gray-500\">${proposta.data} - ${proposta.id.substring(0, 8)}...</div>
+                    ${obs}
+                </div>
+                <button class=\"btn-secondary\" data-action=\"dup\" data-id=\"${proposta.id}\">Duplicar</button>
+            </div>`;
+        }).join('');
         
         container.innerHTML = html;
         
         // Adicionar event listeners
-        container.querySelectorAll('.proposta-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const id = item.dataset.id;
+        container.querySelectorAll('.proposta-item [data-action="open"]').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const id = e.currentTarget.parentElement.dataset.id;
                 window.location.href = `/?id=${id}`;
+            });
+        });
+        container.querySelectorAll('.proposta-item [data-action="dup"]').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const id = e.currentTarget.dataset.id;
+                try {
+                    const resp = await fetch(`/api/proposta/${id}`);
+                    if (!resp.ok) return;
+                    const dados = await resp.json();
+                    // Zera id para forçar criação ao salvar
+                    this.propostaAtual = null;
+                    document.getElementById('propostaId').textContent = '-';
+                    document.getElementById('formProposta').classList.remove('hidden');
+                    document.getElementById('previewPanel').classList.remove('hidden');
+                    const { id: _ignore, ...semId } = dados;
+                    this.preencherFormulario(semId);
+                    this.atualizarPreview();
+                    document.getElementById('linkProposta').classList.add('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } catch (_) {}
             });
         });
     }
