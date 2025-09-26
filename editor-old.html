@@ -100,31 +100,45 @@
 </head>
 <body>
     <div class="h-screen flex">
-        <!-- Painel de Edição (Esquerda) -->
         <div class="w-1/3 editor-panel flex flex-col">
             <div class="p-6 pb-4 border-b border-gray-200">
                 <h1 class="text-2xl font-bold text-center mb-2" style="color: #07325b;">Editor de Propostas</h1>
                 <p class="text-center text-gray-600">DGenny Compre.AI</p>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 pt-4">
-
-            <!-- Tela Inicial: apenas Nova Proposta -->
-            <div id="telaInicial" class="mb-6">
-                <button id="novaProposta" class="btn-primary w-full mb-4">Nova Proposta</button>
-            </div>
-
-            <!-- Tela de Edição: formulário + controles (inicialmente oculta) -->
-            <div id="telaEdicao" class="hidden">
-                <div class="text-sm text-gray-600 mb-4">
-                    <span>ID da Proposta: </span>
-                    <span id="propostaId" class="font-mono">-</span>
+            <div class="flex h-screen bg-gray-100">
+        <!-- Painel de Edição (Esquerda) -->
+        <div class="w-1/3 bg-white shadow-lg overflow-y-auto">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">Editor de Propostas DGenny</h1>
+                
+                <!-- Interface Inicial -->
+                <div id="interfaceInicial" class="space-y-6">
+                    <div class="text-center">
+                        <button id="novaProposta" class="btn-primary w-full mb-4 py-3 text-lg">Nova Proposta</button>
+                    </div>
+                    
+                    <div class="section-header">Propostas Recentes</div>
+                    <div id="listaPropostas" class="space-y-2">
+                        <p class="text-sm text-gray-500">Nenhuma proposta encontrada</p>
+                    </div>
                 </div>
 
-                <!-- Formulário de Edição -->
-                <form id="formProposta">
-                <!-- Informações Básicas -->
-                <div class="section-header">Informações Básicas</div>
-                
+                <!-- Interface de Edição (inicialmente oculta) -->
+                <div id="interfaceEdicao" class="hidden">
+                    <!-- Informações da Proposta Atual -->
+                    <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                        <div class="text-sm text-gray-600">ID da Proposta:</div>
+                        <div id="propostaId" class="font-mono text-sm">Nova Proposta</div>
+                        
+                        <!-- Link da Proposta (inicialmente oculto) -->
+                        <div id="linkProposta" class="mt-3 hidden">
+                            <div class="text-sm text-gray-600 mb-1">Link da Proposta:</div>
+                            <div class="flex">
+                                <input id="linkInput" type="text" readonly class="flex-1 px-2 py-1 text-xs border rounded-l bg-gray-50">
+                                <button id="copiarLink" class="px-3 py-1 bg-blue-500 text-white text-xs rounded-r hover:bg-blue-600">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
                 <div class="form-group">
                     <label class="form-label">
                         Cliente
@@ -345,30 +359,13 @@
                     </label>
                     <input type="text" name="contato" class="form-input" value="rodrigo@dgenny.com.br">
                 </div>
-                </form>
 
-                <!-- Controles de salvamento -->
-                <div class="mt-6 space-y-3">
-                    <button id="salvarProposta" class="btn-primary w-full">Salvar Proposta</button>
-                    
-                    <!-- Link da proposta (inicialmente oculto) -->
-                    <div id="linkProposta" class="hidden p-3 bg-blue-50 rounded-lg">
-                        <label class="form-label">Link da Proposta:</label>
-                        <div class="flex">
-                            <input type="text" id="linkInput" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md text-sm" readonly>
-                            <button id="copiarLink" class="px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 text-sm">Copiar</button>
-                        </div>
-                    </div>
-                    
-                    <button id="voltarInicial" class="btn-secondary w-full">← Voltar ao Início</button>
+                <!-- Lista de Propostas -->
+                <div class="section-header mt-6">Propostas Recentes</div>
+                <div id="listaPropostas" class="space-y-2">
+                    <p class="text-sm text-gray-500">Nenhuma proposta encontrada</p>
                 </div>
-            </div>
-
-            <!-- Lista de Propostas Recentes (sempre visível) -->
-            <div class="section-header mt-6">Propostas Recentes</div>
-            <div id="listaPropostas" class="space-y-2">
-                <p class="text-sm text-gray-500">Nenhuma proposta encontrada</p>
-            </div>
+            </form>
             </div>
         </div>
 
@@ -402,12 +399,7 @@
           container.querySelectorAll('.proposta-item').forEach(item => {
             item.addEventListener('click', () => {
               const id = item.dataset.id;
-              // Se há uma instância do editor, usar o método dela, senão recarregar página
-              if (window.editorInstance) {
-                window.editorInstance.carregarProposta(id);
-              } else {
-                window.location.href = `/?id=${id}`;
-              }
+              window.location.href = `/?id=${id}`;
             });
           });
         }
@@ -432,6 +424,6 @@
       })();
     </script>
     <!-- Cache-busting query to ensure latest JS is loaded after deploy -->
-    <script src="editor.js?v=20250925-3"></script>
+    <script src="editor.js?v=20250925-2"></script>
 </body>
 </html>

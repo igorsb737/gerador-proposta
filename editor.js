@@ -16,9 +16,10 @@ class EditorProposta {
 
     initEventListeners() {
         // Botões principais
-        document.getElementById('novaProposta').addEventListener('click', () => this.novaProposta());
+        document.getElementById('novaProposta').addEventListener('click', () => this.mostrarTelaEdicao());
         document.getElementById('salvarProposta').addEventListener('click', () => this.salvarProposta());
         document.getElementById('copiarLink').addEventListener('click', () => this.copiarLink());
+        document.getElementById('voltarInicial').addEventListener('click', () => this.voltarTelaInicial());
 
         // Formulário - atualizar preview em tempo real
         const form = document.getElementById('formProposta');
@@ -40,31 +41,57 @@ class EditorProposta {
         
         if (propostaId && propostaId.length > 10) { // Validar se parece com um UUID
             await this.carregarProposta(propostaId);
-            // Mostrar UI completa
-            document.getElementById('formProposta').classList.remove('hidden');
-            document.getElementById('previewPanel').classList.remove('hidden');
             return;
         }
         
-        // Se não há ID válido, limpar URL e carregar dados padrão
+        // Se não há ID válido, limpar URL e mostrar tela inicial
         if (propostaId) {
             window.history.replaceState({}, '', '/');
         }
         
-        // Não mostrar formulário por padrão; apenas lista e botão 'Nova Proposta'
+        this.voltarTelaInicial();
+    }
+
+    mostrarTelaEdicao() {
+        document.getElementById('telaInicial').classList.add('hidden');
+        document.getElementById('telaEdicao').classList.remove('hidden');
+        
+        // Se não há proposta atual, carregar dados padrão
+        if (!this.propostaAtual) {
+            this.carregarDadosPadrao();
+        }
+        
+        this.atualizarPreview();
+    }
+
+    voltarTelaInicial() {
+        document.getElementById('telaInicial').classList.remove('hidden');
+        document.getElementById('telaEdicao').classList.add('hidden');
+        document.getElementById('linkProposta').classList.add('hidden');
+        
+        // Limpar proposta atual e URL
+        this.propostaAtual = null;
+        document.getElementById('propostaId').textContent = '-';
+        window.history.replaceState({}, '', '/');
+        
+        // Limpar preview
+        const iframe = document.getElementById('previewFrame');
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.open();
+        doc.write('');
+        doc.close();
     }
 
     carregarDadosPadrao() {
         // Carregar dados padrão
         const dadosPadrao = {
-            cliente: '',
-            vendedor: '',
+            cliente: 'TREZE INCORPORADORA',
             data: new Date().toLocaleDateString('pt-BR'),
             plano: 'Prime',
             negociacoes: '2.000',
             usuarios: '5',
             whatsapp: '1',
-            roi: 'R$ 20.000 / mês',
+            roi: 'R$ 50.000 / mês',
             pacoteAdicional: 'R$ 200 para 100 negociações',
             whatsappAdicional: 'R$ 350 por número',
             garantiaTempo: '60',
@@ -76,15 +103,14 @@ class EditorProposta {
             implantacao: 'R$ 10.000',
             implantacaoDesconto: 'R$ 5.000',
             integracoes: 'SIENGE',
-            mostrarOfertaFeira: false,
-            mostrarDesconto: false,
-            mostrarDescontoImplantacao: false,
-            mostrarIntegracoes: false,
-            semFidelidade: false,
+            mostrarOfertaFeira: true,
+            mostrarDesconto: true,
+            mostrarDescontoImplantacao: true,
+            mostrarIntegracoes: true,
+            semFidelidade: true,
             textoFidelidade: 'Após a implantação, não há período de fidelidade.',
             validade: '30/09/2025',
-            contato: 'simone@dgenny.com.br',
-            observacaoInterna: ''
+            contato: 'rodrigo@dgenny.com.br'
         };
 
         this.preencherFormulario(dadosPadrao);
@@ -100,18 +126,20 @@ class EditorProposta {
                 document.getElementById('propostaId').textContent = `${proposta.cliente} - ${id}`;
                 this.mostrarLinkProposta(id);
                 this.preencherFormulario(proposta);
-                this.atualizarPreview();
+                
+                // Mostrar tela de edição com a proposta carregada
+                this.mostrarTelaEdicao();
             } else {
                 console.warn(`Proposta ${id} não encontrada no servidor`);
-                // Limpar URL inválida e carregar dados padrão
+                // Limpar URL inválida e voltar à tela inicial
                 window.history.replaceState({}, '', '/');
-                this.carregarDadosPadrao();
+                this.voltarTelaInicial();
             }
         } catch (error) {
             console.warn(`Erro ao carregar proposta ${id}:`, error.message);
-            // Limpar URL inválida e carregar dados padrão
+            // Limpar URL inválida e voltar à tela inicial
             window.history.replaceState({}, '', '/');
-            this.carregarDadosPadrao();
+            this.voltarTelaInicial();
         }
     }
 
@@ -146,61 +174,57 @@ class EditorProposta {
         return dados;
     }
 
-    async novaProposta() {
-        // Apenas prepara a UI para uma nova proposta; criação acontece ao salvar
-        this.propostaAtual = null;
-        document.getElementById('propostaId').textContent = '-';
-        document.getElementById('formProposta').classList.remove('hidden');
-        document.getElementById('previewPanel').classList.remove('hidden');
-        this.carregarDadosPadrao();
-        // Esconde link até salvar
-        document.getElementById('linkProposta').classList.add('hidden');
-    }
-
     async salvarProposta() {
         try {
             const dados = this.obterDadosFormulario();
-            let resultado;
-            if (!this.propostaAtual || !this.propostaAtual.id) {
-                // Criar nova
-                const resp = await fetch('/api/proposta', {
+            
+            if (!this.propostaAtual) {
+                // Criar nova proposta
+                const response = await fetch('/api/proposta', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(dados)
                 });
-                resultado = await resp.json();
-                if (resp.ok && resultado.success) {
+
+                const resultado = await response.json();
+                
+                if (resultado.success) {
                     this.propostaAtual = { ...dados, id: resultado.id };
-                    document.getElementById('propostaId').textContent = `${dados.cliente || ''} - ${resultado.id}`;
+                    document.getElementById('propostaId').textContent = `${dados.cliente} - ${resultado.id}`;
                     this.mostrarLinkProposta(resultado.id);
                     alert('Proposta criada com sucesso!');
                     this.atualizarPreview();
-                } else {
-                    throw new Error('Falha ao criar proposta');
+                    // Recarrega lista exclusivamente do backend (Blob em prod)
+                    this.carregarListaPropostas();
                 }
             } else {
-                // Atualizar existente
-                const resp = await fetch(`/api/proposta/${this.propostaAtual.id}`, {
+                // Atualizar proposta existente
+                const response = await fetch(`/api/proposta/${this.propostaAtual.id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(dados)
                 });
-                resultado = await resp.json();
-                if (resp.ok && resultado.success) {
+
+                const resultado = await response.json();
+                
+                if (resultado.success) {
                     this.propostaAtual = { ...dados, id: this.propostaAtual.id };
-                    alert('Proposta salva com sucesso!');
+                    alert('Proposta atualizada com sucesso!');
                     this.atualizarPreview();
-                } else {
-                    throw new Error('Falha ao salvar proposta');
+                    // Recarrega lista exclusivamente do backend (Blob em prod)
+                    this.carregarListaPropostas();
                 }
             }
-            // Atualiza lista
-            this.carregarListaPropostas();
         } catch (error) {
             console.error('Erro ao salvar proposta:', error);
             alert('Erro ao salvar proposta');
         }
     }
+
 
     mostrarLinkProposta(id) {
         const linkDiv = document.getElementById('linkProposta');
@@ -259,46 +283,20 @@ class EditorProposta {
             return;
         }
 
-        const html = propostas.map(proposta => {
-            const obs = proposta.observacaoInterna ? `<div class=\"text-xs text-gray-400\">${proposta.observacaoInterna}</div>` : '';
-            return `
-            <div class=\"proposta-item p-2 border rounded hover:bg-gray-50\" data-id=\"${proposta.id}\" style=\"display:flex;justify-content:space-between;align-items:center;gap:8px;\">
-                <div class=\"flex-1 cursor-pointer\" data-action=\"open\">
-                    <div class=\"text-sm font-medium\">${proposta.cliente}</div>
-                    <div class=\"text-xs text-gray-500\">${proposta.data} - ${proposta.id.substring(0, 8)}...</div>
-                    ${obs}
-                </div>
-                <button class=\"btn-secondary\" data-action=\"dup\" data-id=\"${proposta.id}\">Duplicar</button>
-            </div>`;
-        }).join('');
+        const html = propostas.map(proposta => `
+            <div class="proposta-item p-2 border rounded cursor-pointer hover:bg-gray-50" data-id="${proposta.id}">
+                <div class="text-sm font-medium">${proposta.cliente}</div>
+                <div class="text-xs text-gray-500">${proposta.data} - ${proposta.id.substring(0, 8)}...</div>
+            </div>
+        `).join('');
         
         container.innerHTML = html;
         
         // Adicionar event listeners
-        container.querySelectorAll('.proposta-item [data-action="open"]').forEach(el => {
-            el.addEventListener('click', (e) => {
-                const id = e.currentTarget.parentElement.dataset.id;
-                window.location.href = `/?id=${id}`;
-            });
-        });
-        container.querySelectorAll('.proposta-item [data-action="dup"]').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const id = e.currentTarget.dataset.id;
-                try {
-                    const resp = await fetch(`/api/proposta/${id}`);
-                    if (!resp.ok) return;
-                    const dados = await resp.json();
-                    // Zera id para forçar criação ao salvar
-                    this.propostaAtual = null;
-                    document.getElementById('propostaId').textContent = '-';
-                    document.getElementById('formProposta').classList.remove('hidden');
-                    document.getElementById('previewPanel').classList.remove('hidden');
-                    const { id: _ignore, ...semId } = dados;
-                    this.preencherFormulario(semId);
-                    this.atualizarPreview();
-                    document.getElementById('linkProposta').classList.add('hidden');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                } catch (_) {}
+        container.querySelectorAll('.proposta-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const id = item.dataset.id;
+                this.carregarProposta(id);
             });
         });
     }
@@ -597,5 +595,5 @@ class="w-[70px] h-[70px] mb-4 sm:mb-0 sm:mr-6 rounded">
 
 // Inicializar o editor quando a página carregar
 document.addEventListener('DOMContentLoaded', () => {
-    new EditorProposta();
+    window.editorInstance = new EditorProposta();
 });
