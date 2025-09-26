@@ -135,6 +135,22 @@
 
                 <div class="form-group">
                     <label class="form-label">
+                        Vendedor
+                        <span class="tooltip" data-tooltip="Nome do vendedor responsável">ℹ️</span>
+                    </label>
+                    <input type="text" name="vendedor" class="form-input" value="">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Observação Interna
+                        <span class="tooltip" data-tooltip="Observações internas (não aparecem na proposta)">ℹ️</span>
+                    </label>
+                    <textarea name="observacaoInterna" class="form-input" rows="3" placeholder="Observações internas..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
                         Data da Proposta
                         <span class="tooltip" data-tooltip="Data de criação da proposta">ℹ️</span>
                     </label>
@@ -471,6 +487,6 @@
       });
     </script>
     <!-- Cache-busting query to ensure latest JS is loaded after deploy -->
-    <script src="editor.js?v=20250925-6"></script>
+    <script src="editor.js?v=20250925-7"></script>
 </body>
 </html>

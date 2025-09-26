@@ -23,7 +23,7 @@ class EditorProposta {
 
         // Formulário - atualizar preview em tempo real
         const form = document.getElementById('formProposta');
-        const inputs = form.querySelectorAll('input');
+        const inputs = form.querySelectorAll('input, textarea');
         
         inputs.forEach(input => {
             if (input.type === 'checkbox') {
@@ -127,12 +127,14 @@ class EditorProposta {
         // Carregar dados vazios para nova proposta (apenas valores padrão essenciais)
         const dadosVazios = {
             cliente: '',
+            vendedor: '',
+            observacaoInterna: '',
             data: new Date().toLocaleDateString('pt-BR'),
             plano: 'Prime',
             negociacoes: '2.000',
             usuarios: '5',
             whatsapp: '1',
-            roi: 'R$ 50.000 / mês',
+            roi: 'R$ 20.000 / mês',
             pacoteAdicional: 'R$ 200 para 100 negociações',
             whatsappAdicional: 'R$ 350 por número',
             garantiaTempo: '60',
@@ -144,14 +146,14 @@ class EditorProposta {
             implantacao: 'R$ 10.000',
             implantacaoDesconto: 'R$ 5.000',
             integracoes: 'SIENGE',
-            mostrarOfertaFeira: true,
+            mostrarOfertaFeira: false,
             mostrarDesconto: true,
-            mostrarDescontoImplantacao: true,
-            mostrarIntegracoes: true,
+            mostrarDescontoImplantacao: false,
+            mostrarIntegracoes: false,
             semFidelidade: true,
             textoFidelidade: 'Após a implantação, não há período de fidelidade.',
             validade: '30/09/2025',
-            contato: 'rodrigo@dgenny.com.br'
+            contato: 'simone@dgenny.com.br'
         };
 
         this.preencherFormulario(dadosVazios);
@@ -192,7 +194,7 @@ class EditorProposta {
                 if (input.type === 'checkbox') {
                     input.checked = dados[key];
                 } else {
-                    input.value = dados[key];
+                    input.value = dados[key] || '';
                 }
             }
         });
@@ -202,8 +204,8 @@ class EditorProposta {
         const form = document.getElementById('formProposta');
         const dados = {};
         
-        // Obter todos os inputs
-        const inputs = form.querySelectorAll('input');
+        // Obter todos os inputs e textareas
+        const inputs = form.querySelectorAll('input, textarea');
         inputs.forEach(input => {
             if (input.type === 'checkbox') {
                 dados[input.name] = input.checked;
