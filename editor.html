@@ -368,7 +368,51 @@
         </div>
     </div>
 
+    <!-- Hotfix: preencher propostas recentes direto da API caso editor.js não rode -->
+    <script>
+      (function(){
+        function renderLista(propostas){
+          const container = document.getElementById('listaPropostas');
+          if (!container) return;
+          if (!Array.isArray(propostas) || propostas.length === 0){
+            container.innerHTML = '<p class="text-sm text-gray-500">Nenhuma proposta encontrada</p>';
+            return;
+          }
+          const html = propostas.map(p => `
+            <div class="proposta-item p-2 border rounded cursor-pointer hover:bg-gray-50" data-id="${p.id}">
+              <div class="text-sm font-medium">${p.cliente}</div>
+              <div class="text-xs text-gray-500">${p.data} - ${p.id.substring(0,8)}...</div>
+            </div>
+          `).join('');
+          container.innerHTML = html;
+          container.querySelectorAll('.proposta-item').forEach(item => {
+            item.addEventListener('click', () => {
+              const id = item.dataset.id;
+              window.location.href = `/?id=${id}`;
+            });
+          });
+        }
+        function needsFill(){
+          const container = document.getElementById('listaPropostas');
+          if (!container) return false;
+          // Se ainda está com placeholder, vamos preencher
+          return /Nenhuma proposta encontrada/.test(container.innerText.trim()) || container.children.length < 1;
+        }
+        function load(){
+          if (!needsFill()) return;
+          fetch('/api/propostas', { cache: 'no-store' })
+            .then(r => r.ok ? r.json() : [])
+            .then(renderLista)
+            .catch(() => renderLista([]));
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', load);
+        } else {
+          load();
+        }
+      })();
+    </script>
     <!-- Cache-busting query to ensure latest JS is loaded after deploy -->
-    <script src="editor.js?v=20250925-1"></script>
+    <script src="editor.js?v=20250925-2"></script>
 </body>
 </html>
