@@ -431,7 +431,46 @@
         }
       })();
     </script>
+    <!-- Debug inline para testar imediatamente -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('=== DEBUG INLINE ===');
+        
+        const btnNova = document.getElementById('novaProposta');
+        const telaInicial = document.getElementById('telaInicial');
+        const telaEdicao = document.getElementById('telaEdicao');
+        
+        console.log('Elementos encontrados:');
+        console.log('- btnNova:', btnNova);
+        console.log('- telaInicial:', telaInicial);
+        console.log('- telaEdicao:', telaEdicao);
+        
+        if (btnNova) {
+          console.log('Adicionando listener ao botão...');
+          btnNova.addEventListener('click', (e) => {
+            e.preventDefault();
+            console.log('=== BOTÃO CLICADO ===');
+            
+            if (telaInicial) {
+              console.log('Escondendo tela inicial...');
+              telaInicial.style.display = 'none';
+              console.log('Tela inicial escondida:', telaInicial.style.display);
+            }
+            
+            if (telaEdicao) {
+              console.log('Mostrando tela edição...');
+              telaEdicao.style.display = 'block';
+              telaEdicao.classList.remove('hidden');
+              console.log('Tela edição mostrada:', telaEdicao.style.display);
+              console.log('Classes da tela edição:', telaEdicao.className);
+            }
+          });
+        } else {
+          console.error('Botão novaProposta não encontrado!');
+        }
+      });
+    </script>
     <!-- Cache-busting query to ensure latest JS is loaded after deploy -->
-    <script src="editor.js?v=20250925-5"></script>
+    <script src="editor.js?v=20250925-6"></script>
 </body>
 </html>
