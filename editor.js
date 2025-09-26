@@ -16,7 +16,7 @@ class EditorProposta {
 
     initEventListeners() {
         // Botões principais
-        document.getElementById('novaProposta').addEventListener('click', () => this.mostrarTelaEdicao());
+        document.getElementById('novaProposta').addEventListener('click', () => this.mostrarTelaEdicao(true));
         document.getElementById('salvarProposta').addEventListener('click', () => this.salvarProposta());
         document.getElementById('copiarLink').addEventListener('click', () => this.copiarLink());
         document.getElementById('voltarInicial').addEventListener('click', () => this.voltarTelaInicial());
@@ -52,12 +52,18 @@ class EditorProposta {
         this.voltarTelaInicial();
     }
 
-    mostrarTelaEdicao() {
+    mostrarTelaEdicao(isNovaProposta = false) {
         document.getElementById('telaInicial').classList.add('hidden');
         document.getElementById('telaEdicao').classList.remove('hidden');
         
-        // Se não há proposta atual, carregar dados padrão
-        if (!this.propostaAtual) {
+        if (isNovaProposta) {
+            // Nova proposta: campos vazios, sem dados mocados
+            this.carregarDadosVazios();
+            this.propostaAtual = null;
+            document.getElementById('propostaId').textContent = 'Nova Proposta';
+            document.getElementById('linkProposta').classList.add('hidden');
+        } else if (!this.propostaAtual) {
+            // Carregando proposta existente sem dados
             this.carregarDadosPadrao();
         }
         
@@ -83,7 +89,7 @@ class EditorProposta {
     }
 
     carregarDadosPadrao() {
-        // Carregar dados padrão
+        // Carregar dados padrão (para propostas existentes)
         const dadosPadrao = {
             cliente: 'TREZE INCORPORADORA',
             data: new Date().toLocaleDateString('pt-BR'),
@@ -114,6 +120,41 @@ class EditorProposta {
         };
 
         this.preencherFormulario(dadosPadrao);
+        this.atualizarPreview();
+    }
+
+    carregarDadosVazios() {
+        // Carregar dados vazios para nova proposta (apenas valores padrão essenciais)
+        const dadosVazios = {
+            cliente: '',
+            data: new Date().toLocaleDateString('pt-BR'),
+            plano: 'Prime',
+            negociacoes: '2.000',
+            usuarios: '5',
+            whatsapp: '1',
+            roi: 'R$ 50.000 / mês',
+            pacoteAdicional: 'R$ 200 para 100 negociações',
+            whatsappAdicional: 'R$ 350 por número',
+            garantiaTempo: '60',
+            garantiaMinimo: '50',
+            garantiaVolume: 'R$ 1 milhões',
+            garantiaRoi: '5 vezes',
+            precoInicial: 'R$ 2.000',
+            precoPlano: 'R$ 4.000',
+            implantacao: 'R$ 10.000',
+            implantacaoDesconto: 'R$ 5.000',
+            integracoes: 'SIENGE',
+            mostrarOfertaFeira: true,
+            mostrarDesconto: true,
+            mostrarDescontoImplantacao: true,
+            mostrarIntegracoes: true,
+            semFidelidade: true,
+            textoFidelidade: 'Após a implantação, não há período de fidelidade.',
+            validade: '30/09/2025',
+            contato: 'rodrigo@dgenny.com.br'
+        };
+
+        this.preencherFormulario(dadosVazios);
         this.atualizarPreview();
     }
 
