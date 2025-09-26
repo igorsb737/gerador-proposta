@@ -65,52 +65,6 @@ app.get('/api/test', (req, res) => {
     });
 });
 
-// Endpoint para inicializar índice com propostas existentes
-app.post('/api/init-index', async (req, res) => {
-    try {
-        console.log('Inicializando índice...');
-        const { put, list } = require('@vercel/blob');
-        
-        // Buscar todas as propostas existentes
-        const result = await list({ prefix: 'propostas/' });
-        const blobs = result.blobs || [];
-        
-        console.log('Encontradas', blobs.length, 'propostas para indexar');
-        
-        const index = [];
-        for (const blob of blobs) {
-            try {
-                const resp = await fetch(blob.url);
-                if (resp.ok) {
-                    const data = await resp.json();
-                    index.push({
-                        id: data.id,
-                        cliente: data.cliente,
-                        data: data.data,
-                        plano: data.plano,
-                        updatedAt: new Date().toISOString()
-                    });
-                }
-            } catch (e) {
-                console.warn('Erro ao processar blob:', blob.pathname);
-            }
-        }
-        
-        // Salvar índice
-        await put('index/propostas.json', JSON.stringify(index), {
-            contentType: 'application/json',
-            access: 'public'
-        });
-        
-        console.log('Índice criado com', index.length, 'propostas');
-        res.json({ success: true, indexed: index.length });
-        
-    } catch (error) {
-        console.error('Erro ao inicializar índice:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // Rota principal - Editor
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'editor.html'));
